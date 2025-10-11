@@ -1,16 +1,23 @@
 #include "bitops.h"
 
-const int BITS_IN_BYTE = 8;
-const int BITS_IN_UINT64 = BITS_IN_BYTE * 8;
-const uint64_t FIRST_BIT_IN_UINT64_MASK = 0x8000000000000000;
-const uint64_t FIRST_BYTE_IN_UINT64_MASK = 0xff00000000000000;
+namespace {
+    constexpr size_t BITS_IN_BYTE = 8;
+    constexpr size_t BITS_IN_UINT64 = BITS_IN_BYTE * 8;
+    constexpr uint64_t FIRST_BIT_IN_UINT64_MASK = 0x8000000000000000;
+    constexpr uint64_t FIRST_BYTE_IN_UINT64_MASK = 0xff00000000000000;
+}
 
 uint64_t SwapBytes(uint64_t value) {
     uint64_t result = 0;
     uint64_t mask = FIRST_BYTE_IN_UINT64_MASK;
-    int shift = BITS_IN_UINT64 - BITS_IN_BYTE;
-    for (int i = 0; i < BITS_IN_UINT64 / BITS_IN_BYTE; ++i) {
-        result |= (shift > 0) ? (value & mask) >> shift : (value & mask) << -shift;
+    size_t shift = 2 * BITS_IN_UINT64 - BITS_IN_BYTE;
+    for (size_t i = 0; i < BITS_IN_UINT64 / BITS_IN_BYTE; ++i) {
+        std::cout << shift << " ";
+        if (shift > BITS_IN_UINT64) {
+            result |= (value & mask) >> (shift - BITS_IN_UINT64);
+        } else {
+            result |= (value & mask) << (BITS_IN_UINT64 - shift);
+        }
         mask >>= BITS_IN_BYTE;
         shift -= 2 * BITS_IN_BYTE;
     }
@@ -20,7 +27,7 @@ uint64_t SwapBytes(uint64_t value) {
 uint64_t ReverseBits(uint64_t value) {
     uint64_t result = 0;
     uint64_t mask = 1;
-    for (int i = 0; i < BITS_IN_UINT64; ++i) {
+    for (size_t i = 0; i < BITS_IN_UINT64; ++i) {
         if (i < BITS_IN_UINT64 / 2) {
             result |= (value & mask) << ((BITS_IN_UINT64 - 1) - i * 2);
         } else {
@@ -34,7 +41,7 @@ uint64_t ReverseBits(uint64_t value) {
 uint64_t ReverseBitsInBytes(uint64_t value) {
     uint64_t result = 0;
     uint64_t mask = 1;
-    for (int i = 0; i < BITS_IN_UINT64; ++i) {
+    for (size_t i = 0; i < BITS_IN_UINT64; ++i) {
         if (i % BITS_IN_BYTE < BITS_IN_BYTE / 2) {
             result |= (value & mask) << ((BITS_IN_BYTE - 1) - (i % BITS_IN_BYTE) * 2);
         } else {
@@ -48,7 +55,7 @@ uint64_t ReverseBitsInBytes(uint64_t value) {
 uint64_t SetBits(uint64_t value, uint64_t offset, uint64_t count, uint64_t bits) {
     uint64_t result = 0;
     uint64_t mask = 1;
-    for (int i = 0; i < BITS_IN_UINT64; ++i) {
+    for (size_t i = 0; i < BITS_IN_UINT64; ++i) {
         if (i >= offset && i < offset + count) {
             result |= (bits & (mask >> offset)) << offset;
         } else {
@@ -62,7 +69,7 @@ uint64_t SetBits(uint64_t value, uint64_t offset, uint64_t count, uint64_t bits)
 uint64_t ExtractBits(uint64_t value, uint64_t offset, uint64_t count) {
     uint64_t result = 0;
     uint64_t mask = 1;
-    for (int i = 0; i < BITS_IN_UINT64; ++i) {
+    for (size_t i = 0; i < BITS_IN_UINT64; ++i) {
         if (i >= offset && i < offset + count) {
             result |= (value & mask) >> offset;
         }
@@ -74,7 +81,7 @@ uint64_t ExtractBits(uint64_t value, uint64_t offset, uint64_t count) {
 uint32_t CountSetBits(uint64_t value) {
     uint64_t result = 0;
     uint64_t mask = 1;
-    for (int i = 0; i < BITS_IN_UINT64; ++i) {
+    for (size_t i = 0; i < BITS_IN_UINT64; ++i) {
         if (value & mask) {
             ++result;
         }
@@ -87,7 +94,7 @@ uint32_t CountTrailingZeros(uint64_t value) {
     uint64_t result = 0;
     uint64_t mask = 1;
     bool flag = true;
-    for (int i = 0; i < BITS_IN_UINT64; ++i) {
+    for (size_t i = 0; i < BITS_IN_UINT64; ++i) {
         if (!flag) {
             break;
         }
@@ -105,7 +112,7 @@ uint32_t CountLeadingZeros(uint64_t value) {
     uint64_t result = 0;
     uint64_t mask = FIRST_BIT_IN_UINT64_MASK;
     bool flag = true;
-    for (int i = 0; i < BITS_IN_UINT64; ++i) {
+    for (size_t i = 0; i < BITS_IN_UINT64; ++i) {
         if (!flag) {
             break;
         }
@@ -136,7 +143,7 @@ uint64_t RotateRight(uint64_t value, uint32_t shift) {
 bool IsPowerOfTwo(uint64_t value) {
     uint64_t mask = 1;
     bool flag = false;
-    for (int i = 0; i < BITS_IN_UINT64; ++i) {
+    for (size_t i = 0; i < BITS_IN_UINT64; ++i) {
         if (value & mask) {
             if (flag) {
                 return false;
@@ -155,7 +162,7 @@ uint64_t RoundUpToPowerOfTwo(uint64_t value) {
     }
     uint64_t mask = FIRST_BIT_IN_UINT64_MASK;
     uint64_t result = 1;
-    for (int i = 0; i < BITS_IN_UINT64; ++i) {
+    for (size_t i = 0; i < BITS_IN_UINT64; ++i) {
         if (value & mask) {
             return result << ((value & ~mask) ? BITS_IN_UINT64 - i : (BITS_IN_UINT64 - 1) - i);
         }
@@ -165,27 +172,9 @@ uint64_t RoundUpToPowerOfTwo(uint64_t value) {
 }
 
 uint64_t AlignDown(uint64_t value, uint64_t alignment) {
-    uint64_t result = value;
-    uint64_t mask = 1;
-    for (int i = 0; i < BITS_IN_UINT64; ++i) {
-        if (alignment & mask) {
-            return result;
-        }
-        result &= ~mask;
-        mask <<= 1;
-    }
-    return 0;
+    return value & ~(alignment - 1);
 }
 
 uint64_t AlignUp(uint64_t value, uint64_t alignment) {
-    uint64_t result = value + alignment - 1;
-    uint64_t mask = 1;
-    for (int i = 0; i < BITS_IN_UINT64; ++i) {
-        if (alignment & mask) {
-            return result;
-        }
-        result &= ~mask;
-        mask <<= 1;
-    }
-    return 0;
+    return (value + alignment - 1) & ~(alignment - 1);
 }

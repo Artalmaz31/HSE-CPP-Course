@@ -1,11 +1,7 @@
 #include "safe_arithmetic.h"
 #include <limits>
 
-bool SafeAdd(int64_t a, int64_t b, int64_t& result) {
-    (void)a;
-    (void)b;
-    (void)result;
-    
+bool SafeAdd(int64_t a, int64_t b, int64_t& result) {    
     if (b > 0 && a > INT64_MAX - b) {
         return false;
     } else if (b < 0 && a < INT64_MIN - b) {
@@ -17,10 +13,6 @@ bool SafeAdd(int64_t a, int64_t b, int64_t& result) {
 }
 
 bool SafeSubtract(int64_t a, int64_t b, int64_t& result) {
-    (void)a;
-    (void)b;
-    (void)result;
-
     if (b > 0 && a < INT64_MIN + b) {
         return false;
     } else if (b < 0 && a > INT64_MAX + b) {
@@ -32,10 +24,6 @@ bool SafeSubtract(int64_t a, int64_t b, int64_t& result) {
 }
 
 bool SafeMultiply(int64_t a, int64_t b, int64_t& result) {
-    (void)a;
-    (void)b;
-    (void)result;
-
     if (b > 0 && (a < INT64_MIN / b || a > INT64_MAX / b)) {
         return false;
     } else if (b < 0 && (a < INT64_MAX / b || a > INT64_MIN / b)) {
@@ -47,10 +35,6 @@ bool SafeMultiply(int64_t a, int64_t b, int64_t& result) {
 }
 
 bool SafeDivide(int64_t a, int64_t b, int64_t& result) {
-    (void)a;
-    (void)b;
-    (void)result;
-
     if (b == 0) {
         return false;
     } else if (b == -1 && a == INT64_MIN) {
